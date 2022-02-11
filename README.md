@@ -4,6 +4,14 @@
 
 Image super-resolution (SR) is a fast-moving field with novel architectures attracting the spotlight. However, most SR models were optimized with dated training strategies. In this work, we revisit the popular RCAN model and examine the effect of different training options in SR. Surprisingly (or perhaps as expected), we show that RCAN can outperform or match nearly all the CNN-based SR architectures published after RCAN on standard benchmarks with a proper training strategy and minimal architecture change. Besides, although RCAN is a very large SR architecture with more than four hundred convolutional layers, we draw a notable conclusion that underfitting is still the main problem restricting the model capability instead of overfitting. We observe supportive evidence that increasing training iterations clearly improves the model performance while applying regularization techniques generally degrades the predictions. We denote our simply revised RCAN as **RCAN-it** and recommend practitioners to use it as baselines for future research. Please check our [**pre-print**](https://arxiv.org/abs/2201.11279) for more information.
 
+## Pre-trained Weights
+
+We release the pre-trained RCAN-it weights for different scales:
+
+[[RCAN-it (x2)](https://drive.google.com/uc?export=download&id=1g7ch--BAgxc8L4p4ERoth-f_NbyPaWIt)] [[RCAN-it (x3)](https://drive.google.com/uc?export=download&id=1l0q0RfKMyfya8mDKDCmsIvg7XAoF40S-)] [[RCAN-it (x4)](https://drive.google.com/uc?export=download&id=1dDxpjTKtCILBONcEkcI8YAdcG3Nswgvk)]
+
+We also share the [predictions](https://drive.google.com/uc?export=download&id=1aRGAttp2G4qY7WvcCXg2UbGUyklvWhXm) on the Set5 benchmark dataset. The scores (PSNR and SSIM) are evaluated using the MATLAB code in the [RCAN](https://github.com/yulunzhang/RCAN/blob/master/RCAN_TestCode/Evaluate_PSNR_SSIM.m) repository.
+
 ## Environment Setup
 
 Create a new conda environment and install PyTorch:
@@ -107,12 +115,10 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --config-base configs/RCAN/RCAN_Base
 Please check this [pre-print](https://arxiv.org/abs/2201.11279) for details. If you find this work useful for your research, please cite:
 
 ```bibtex
-@misc{lin2022revisiting,
-      title={Revisiting RCAN: Improved Training for Image Super-Resolution}, 
-      author={Zudi Lin and Prateek Garg and Atmadeep Banerjee and Salma Abdel Magid and Deqing Sun and Yulun Zhang and Luc Van Gool and Donglai Wei and Hanspeter Pfister},
-      year={2022},
-      eprint={2201.11279},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@article{lin2022revisiting,
+  title={Revisiting RCAN: Improved Training for Image Super-Resolution},
+  author={Lin, Zudi and Garg, Prateek and Banerjee, Atmadeep and Magid, Salma Abdel and Sun, Deqing and Zhang, Yulun and Van Gool, Luc and Wei, Donglai and Pfister, Hanspeter},
+  journal={arXiv preprint arXiv:2201.11279},
+  year={2022}
 }
 ```
