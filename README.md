@@ -1,10 +1,19 @@
 # Revisiting RCAN: Improved Training for Image Super-Resolution
 
-## Introduction
+## Table of contents
+1. [Introduction](#intro)
+2. [Pre-trained Weights](#pretrained)
+3. [Installation](#install)
+4. [Distributed Training](#ddp)
+5. [Data-paralell Training](#dp)
+6. [Custom Dataset](#custom_data)
+7. [Citation](#citation)
+
+## Introduction <a name="intro"></a>
 
 Image super-resolution (SR) is a fast-moving field with novel architectures attracting the spotlight. However, most SR models were optimized with dated training strategies. In this work, we revisit the popular RCAN model and examine the effect of different training options in SR. Surprisingly (or perhaps as expected), we show that RCAN can outperform or match nearly all the CNN-based SR architectures published after RCAN on standard benchmarks with a proper training strategy and minimal architecture change. Besides, although RCAN is a very large SR architecture with more than four hundred convolutional layers, we draw a notable conclusion that underfitting is still the main problem restricting the model capability instead of overfitting. We observe supportive evidence that increasing training iterations clearly improves the model performance while applying regularization techniques generally degrades the predictions. We denote our simply revised RCAN as **RCAN-it** and recommend practitioners to use it as baselines for future research. Please check our [**pre-print**](https://arxiv.org/abs/2201.11279) for more information.
 
-## Pre-trained Weights
+## Pre-trained Weights <a name="pretrained"></a>
 
 We release the pre-trained RCAN-it weights for different scales:
 
@@ -12,7 +21,7 @@ We release the pre-trained RCAN-it weights for different scales:
 
 We also share the [predictions](https://drive.google.com/uc?export=download&id=1aRGAttp2G4qY7WvcCXg2UbGUyklvWhXm) on the Set5 benchmark dataset. The scores (PSNR and SSIM) are evaluated using the MATLAB code in the [RCAN](https://github.com/yulunzhang/RCAN/blob/master/RCAN_TestCode/Evaluate_PSNR_SSIM.m) repository.
 
-## Environment Setup
+## Installation <a name="install"></a>
 
 Create a new conda environment and install PyTorch:
 
@@ -36,7 +45,7 @@ Our package is called **ptsr**, abbreviating *A PyTorch Framework for Image Supe
 python -m unittest discover -b tests
 ```
 
-## Multi-processing Distributed Data Parallel Training
+## Distributed Data Parallel Training (Recommended) <a name="ddp"></a>
 
 For different hardware conditions, please first update the config files accordingly. Even for single-node single-GPU training, we use distributed data parallel (DDP) for consistency.
 
@@ -93,7 +102,20 @@ Description of the options:
 
 For a system with Slurm Workload Manager, please load required modules: `module load cuda cudnn`.
 
-## Data Parallel Training
+### Inference
+
+We recommend to continue using DDP during inference for consistency. The exemplary inference command using one GPU device is:
+
+```shell
+CUDA_VISIBLE_DEVICES=0 python -u -m torch.distributed.run --nproc_per_node=1 \
+--master_port=9992 main.py --distributed --config-base configs/RCAN/RCAN_Improved.yaml \
+--config-file configs/RCAN/RCAN_x2.yaml MODEL.PRE_TRAIN RCAN_pretrained/model_best.pth.tar \
+SOLVER.TEST_ONLY True MODEL.ENSEMBLE.ENABLED True DATASET.CHOP True
+```
+
+Please remember to update `SYSTEM.NUM_GPU` and `SYSTEM.NUM_CPU` based on your system specifications.
+
+## Data Parallel Training <a name="dp"></a>
 
 Data Parallel training only works on single node with one or multiple GPUs. Different from
 the DDP scheme, it will create only one process. Single GPU training:
@@ -110,7 +132,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --config-base configs/RCAN/RCAN_Base
 --config-file configs/RCAN/RCAN_x2.yaml
 ```
 
-## Training on New Datasets
+## Training on New Datasets <a name="custom_data"></a>
 
 Our code by default train on the **DF2K** dataset. To train on your own dataset (supposing the dataset contains 99 training images in this example). First, structure the data as follows in the dataset directory:
 
@@ -147,7 +169,7 @@ DATASET:
 Note that `DATASET.DATA_EXT: bin` will create a `bin` folder in the dataset directory and save individual images as a single binary file for fast data loading.
 
 
-## Citation
+## Citation <a name="citation"></a>
 
 Please check this [pre-print](https://arxiv.org/abs/2201.11279) for details. If you find this work useful for your research, please cite:
 
