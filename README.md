@@ -110,6 +110,43 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --config-base configs/RCAN/RCAN_Base
 --config-file configs/RCAN/RCAN_x2.yaml
 ```
 
+## Training on New Datasets
+
+Our code by default train on the **DF2K** dataset. To train on your own dataset (supposing the dataset contains 99 training images in this example). First, structure the data as follows in the dataset directory:
+
+```
+MyData/
+  MyData_train_HR/
+    0001.png
+    0002.png
+    ...
+    0099.png
+  MyData_train_LR_bicubic/
+    X2/
+      0001x2.png
+      ...
+    X3/
+      0001x3.png
+      ...
+    X4/
+      0001x4.png
+      ...
+```
+
+Then update the configuration options in the YAML file:
+
+```yaml
+DATASET:
+  DATA_EXT: bin
+  DATA_DIR: path/to/data
+  DATA_TRAIN: ['MyData']
+  DATA_VAL: ['MyData']
+  DATA_RANGE: [[1, 95], [96, 99]] # split training and validation
+```
+
+Note that `DATASET.DATA_EXT: bin` will create a `bin` folder in the dataset directory and save individual images as a single binary file for fast data loading.
+
+
 ## Citation
 
 Please check this [pre-print](https://arxiv.org/abs/2201.11279) for details. If you find this work useful for your research, please cite:

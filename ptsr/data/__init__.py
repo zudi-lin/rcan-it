@@ -16,8 +16,8 @@ class MyConcatDataset(ConcatDataset):
                 d.set_scale(idx_scale)
 
 
-class Data:
-    def __init__(self, cfg):
+class Data(object):
+    def __init__(self, cfg, rank):
         if (cfg.DATASET.FINETUNE.ENABLED):
             data_train = cfg.DATASET.FINETUNE.DATA
             print("Using Dataset(s): " + ','.join(data_train) + " for finetuning\n")
@@ -32,11 +32,16 @@ class Data:
                 if ("2K" in d):
                     module_name = d if d.find('DIV2K-Q') < 0 else 'DIV2KJPEG'
                     m = import_module('ptsr.data.' + module_name.lower())
-                    datasets.append(getattr(m, module_name)(cfg, name=d))
+                    datasets.append(getattr(m, module_name)(cfg, rank=rank, name=d))
 
+                if ("MyData" in d):
+                    m = import_module('ptsr.data.custom')
+                    datasets.append(getattr(m, "CustomData")(cfg, rank=rank, name=d))
+
+                # finetune on the benchmark sets to get "oracle" performance
                 if d in ['Set5', 'Set14C', 'B100', 'Urban100', 'Manga109']:
-                        m = import_module('ptsr.data.benchmark')
-                        datasets.append(getattr(m, 'Benchmark')(cfg, train=True, name=d))
+                    m = import_module('ptsr.data.benchmark')
+                    datasets.append(getattr(m, 'Benchmark')(cfg, train=True, name=d))
 
             self.loader_train = dataloader.DataLoader(
                 MyConcatDataset(datasets),
@@ -46,6 +51,7 @@ class Data:
                 # distribute workers among mutiple processes
                 num_workers=cfg.SYSTEM.NUM_CPU // cfg.SYSTEM.NUM_GPU)
 
+        # build val and test loaders
         self.loader_test = []
         datatest = []
 
@@ -55,13 +61,16 @@ class Data:
             datatest = cfg.DATASET.DATA_TEST
 
         for d in datatest:
-            if d in ['Set5', 'Set14C', 'B100', 'Urban100', 'Manga109']:
+            if ("MyData" in d):
+                m = import_module('ptsr.data.custom')
+                testset = getattr(m, "CustomData")(cfg, train=False, name=d, rank=rank)
+            elif d in ['Set5', 'Set14C', 'B100', 'Urban100', 'Manga109']:
                 m = import_module('ptsr.data.benchmark')
                 testset = getattr(m, 'Benchmark')(cfg, train=False, name=d)
             else:
                 module_name = d if d.find('DIV2K-Q') < 0 else 'DIV2KJPEG'
                 m = import_module('ptsr.data.' + module_name.lower())
-                testset = getattr(m, module_name)(cfg, train=False, name=d)
+                testset = getattr(m, module_name)(cfg, train=False, name=d, rank=rank)
 
             self.loader_test.append(
                 dataloader.DataLoader(
