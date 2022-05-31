@@ -191,7 +191,7 @@ class Trainer():
 
                 if not self.cfg.SOLVER.TEST_ONLY:
                     is_best = False
-                    if best[0][idx_data, idx_scale] >= self.best_val_score:
+                    if best[0][idx_data, idx_scale] > self.best_val_score:
                         self.best_val_score = best[0][idx_data, idx_scale]
                         is_best = True
                     self.ckp.save(self, iteration, is_best, self.iter_start,
