@@ -132,9 +132,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --config-base configs/RCAN/RCAN_Base
 --config-file configs/RCAN/RCAN_x2.yaml
 ```
 
-## Training on New Datasets <a name="custom_data"></a>
+## Training and Evaluation on Custom Datasets <a name="custom_data"></a>
 
-Our code by default train on the **DF2K** dataset. To train on your own dataset (supposing the dataset contains 99 training images in this example). First, structure the data as follows in the dataset directory:
+Our code by default train on the **DF2K** dataset. To train on your own dataset (supposing the dataset contains 99 training images). First, structure the data as follows in the dataset directory:
 
 ```
 MyData/
@@ -167,6 +167,50 @@ DATASET:
 ```
 
 Note that `DATASET.DATA_EXT: bin` will create a `bin` folder in the dataset directory and save individual images as a single binary file for fast data loading.
+
+For evaluation, current implementation requires structing the test data following the format of the benchmark datasets like *Set5*, *Urban100* and *Manga109*. The folder structure is:
+
+```
+st_test/
+  HR/
+    Urban100/
+      x2/ x3/ x4/ x8/
+    ...
+  LRBI/
+    Urban100/
+      x2/ x3/ x4/ x8/
+    ...
+```
+
+To run inference and evaluation on your own dataset, you need to first create a folder called `sr_test/` that shares the same parent directory as `MyData/`. Then organize a data structure like this (the example below is for x2 SR):
+
+```
+MyData/
+sr_test/
+  HR/
+    MyData_Test/
+      x2/
+        0001.png
+        0002.png
+        ...
+        0099.png
+  LRBI/
+    MyData_Test/
+      x2/
+        0001.png
+        0002.png
+        ...
+        0099.png
+```
+
+Please note that for high-resolution images in `HR/`, there should be one folder for each SR scale (they contain the same HR images), which is for consistency with the `LRBI/` directory. And also remeber to update the config option for test data:
+
+```yaml
+  DATASET:
+    DATA_TEST: ["MyData_Test"]
+```
+
+Please note that `MyData_Test` is currently the only supported dataset name for a new benchmark dataset and can not be modified. Other supported benchmark dataset names are `Set5`, `Set14C`, `B100`, `Urban100`, and `Manga109`. Data loading errors can happen if the name does not much. We will make the inference more flexible in future updates.
 
 
 ## Citation <a name="citation"></a>

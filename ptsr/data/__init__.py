@@ -61,10 +61,10 @@ class Data(object):
             datatest = cfg.DATASET.DATA_TEST
 
         for d in datatest:
-            if ("MyData" in d):
+            if ("MyData" in d and "Test" not in d):
                 m = import_module('ptsr.data.custom')
                 testset = getattr(m, "CustomData")(cfg, train=False, name=d)
-            elif d in ['Set5', 'Set14C', 'B100', 'Urban100', 'Manga109']:
+            elif d in ['Set5', 'Set14C', 'B100', 'Urban100', 'Manga109', "MyData_Test"]:
                 m = import_module('ptsr.data.benchmark')
                 testset = getattr(m, 'Benchmark')(cfg, train=False, name=d)
             else:
